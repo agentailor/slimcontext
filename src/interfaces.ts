@@ -1,24 +1,20 @@
 // Core interfaces for slimcontext
 
-export interface Message {
-  role: 'user' | 'assistant' | 'system' | 'tool';
+// Single message shape used across the library and adapters.
+// Includes 'human' (alias some frameworks use) and 'tool' for compatibility.
+export interface SlimContextMessage {
+  role: 'system' | 'user' | 'assistant' | 'tool' | 'human';
   content: string;
 }
 
-// BaseMessage allows optional alias 'human' used by some frameworks
-export interface BaseMessage {
-  role: 'system' | 'user' | 'human' | 'assistant';
+export interface SlimContextModelResponse {
   content: string;
 }
 
-export interface ModelResponse {
-  content: string;
+export interface SlimContextChatModel {
+  invoke(messages: SlimContextMessage[]): Promise<SlimContextModelResponse>;
 }
 
-export interface IChatModel {
-  invoke(messages: BaseMessage[]): Promise<ModelResponse>;
-}
-
-export interface ICompressor {
-  compress(messages: Message[]): Promise<Message[]>;
+export interface SlimContextCompressor {
+  compress(messages: SlimContextMessage[]): Promise<SlimContextMessage[]>;
 }

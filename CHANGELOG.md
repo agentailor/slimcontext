@@ -1,0 +1,43 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
+
+## [Unreleased] - 2025-08-24
+
+### Breaking
+
+- Unified message types: replaced `Message` and `BaseMessage` with a single `SlimContextMessage`.
+  - `IChatModel.invoke(messages: SlimContextMessage[])` (was `BaseMessage[]`).
+  - `ICompressor.compress(messages: SlimContextMessage[])` (was `Message[]`).
+  - Strategies (`TrimCompressor`, `SummarizeCompressor`) now use `SlimContextMessage`.
+- Rationale: avoid naming clashes with other frameworks and have one canonical message shape. `role` now supports `'system' | 'user' | 'assistant' | 'tool' | 'human'`.
+
+- Interface renames for clarity and to avoid clashes:
+  - `ModelResponse` -> `SlimContextModelResponse`
+  - `IChatModel` -> `SlimContextChatModel`
+  - `ICompressor` -> `SlimContextCompressor`
+
+Migration notes:
+
+- Import and use `SlimContextMessage` everywhere you previously used `Message` or `BaseMessage`.
+- Update any custom `IChatModel` implementations to accept `SlimContextMessage[]`.
+- Where applicable, map any external "human" role to `'user'` for providers that do not support it directly.
+
+### Added
+
+- `examples/OPENAI_EXAMPLE.md`: copy-paste OpenAI example demonstrating `SummarizeCompressor` without adding dependencies to this repo.
+- `examples/LANGCHAIN_EXAMPLE.md`: copy-paste LangChain-style example.
+
+### Changed
+
+- README examples and API docs updated to reference `SlimContextMessage` and new `IChatModel` signature.
+
+### Removed
+
+- `examples/with-openai.ts` and `examples/with-langchain.ts` TypeScript files in favor of Markdown examples.
+
+### Behavior
+
+- SummarizeCompressor alignment: after summarization, the first kept message following the summary is enforced to be a `user` message to maintain dialogue consistency. To achieve this while preserving recent context, the resulting message count may be `maxMessages - 1`, `maxMessages`, or `maxMessages + 1` depending on the split position.

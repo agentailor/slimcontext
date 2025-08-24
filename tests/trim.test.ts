@@ -1,10 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { TrimCompressor, Message } from '../src';
+
+import { TrimCompressor, SlimContextMessage } from '../src';
 
 describe('TrimCompressor', () => {
   it('keeps first system and last N-1 messages', async () => {
     const trim = new TrimCompressor({ messagesToKeep: 5 });
-    const history: Message[] = [
+    const history: SlimContextMessage[] = [
       { role: 'system', content: 'sys' },
       { role: 'user', content: 'u1' },
       { role: 'assistant', content: 'a1' },
