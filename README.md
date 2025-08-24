@@ -4,7 +4,12 @@ Lightweight, model-agnostic chat history compression utilities for AI assistants
 
 ![CI](https://github.com/agentailor/slimcontext/actions/workflows/ci.yml/badge.svg)
 
-## Features (v1.0)
+## Examples
+
+- OpenAI: see `examples/OPENAI_EXAMPLE.md` (copy-paste snippet; BYOM, no deps added here).
+- LangChain: see `examples/LANGCHAIN_EXAMPLE.md` (adapts a LangChain chat model to `SlimContextChatModel`).
+
+## Features
 
 - Trim strategy: keep the first (system) message and last N messages.
 - Summarize strategy: summarize the middle portion using your own chat model.
@@ -21,15 +26,25 @@ npm install slimcontext
 Provide a model that implements:
 
 ```ts
-interface BaseMessage { role: 'system' | 'user' | 'human' | 'assistant'; content: string; }
-interface ModelResponse { content: string; }
-interface IChatModel { invoke(messages: BaseMessage[]): Promise<ModelResponse>; }
+interface SlimContextMessage {
+  role: 'system' | 'user' | 'assistant' | 'tool' | 'human';
+  content: string;
+}
+interface SlimContextModelResponse {
+  content: string;
+}
+interface SlimContextChatModel {
+  invoke(messages: SlimContextMessage[]): Promise<SlimContextModelResponse>;
+}
 ```
 
 `slimcontext` handles message arrays shaped as:
 
 ```ts
-interface Message { role: 'user' | 'assistant' | 'system' | 'tool'; content: string; }
+interface SlimContextMessage {
+  role: 'system' | 'user' | 'assistant' | 'tool' | 'human';
+  content: string;
+}
 ```
 
 ## Usage
@@ -37,11 +52,11 @@ interface Message { role: 'user' | 'assistant' | 'system' | 'tool'; content: str
 ### TrimCompressor
 
 ```ts
-import { TrimCompressor, Message } from 'slimcontext';
+import { TrimCompressor, SlimContextMessage } from 'slimcontext';
 
 const compressor = new TrimCompressor({ messagesToKeep: 8 });
 
-let history: Message[] = [
+let history: SlimContextMessage[] = [
   { role: 'system', content: 'You are a helpful assistant.' },
   // ... conversation grows
 ];
@@ -52,12 +67,17 @@ history = await compressor.compress(history);
 ### SummarizeCompressor
 
 ```ts
-import { SummarizeCompressor, Message, IChatModel, BaseMessage, ModelResponse } from 'slimcontext';
+import {
+  SummarizeCompressor,
+  SlimContextMessage,
+  SlimContextChatModel,
+  SlimContextModelResponse,
+} from 'slimcontext';
 
-class MyModel implements IChatModel {
-  async invoke(messages: BaseMessage[]): Promise<ModelResponse> {
+class MyModel implements SlimContextChatModel {
+  async invoke(messages: SlimContextMessage[]): Promise<SlimContextModelResponse> {
     // Call out to your LLM provider (OpenAI, Anthropic, etc.)
-    const userContent = messages.find(m => m.role === 'user')?.content || '';
+    const userContent = messages.find((m) => m.role === 'user')?.content || '';
     return { content: 'Summary: ' + userContent.slice(0, 100) };
   }
 }
@@ -65,13 +85,19 @@ class MyModel implements IChatModel {
 const model = new MyModel();
 const compressor = new SummarizeCompressor({ model, maxMessages: 12 });
 
-let history: Message[] = [
+let history: SlimContextMessage[] = [
   { role: 'system', content: 'You are a helpful assistant.' },
   // ... conversation grows
 ];
 
 history = await compressor.compress(history);
 ```
+
+Notes about summarization behavior
+
+- Alignment: after compression, messages will start with `[system, summary, ...]`, and the first kept message after the summary is always a `user` turn. This preserves dialogue consistency.
+- Size: to keep this alignment and preserve recency, the output length can be `maxMessages - 1`, `maxMessages`, or `maxMessages + 1`.
+  - Preference: if the default split lands on an assistant, we first try shifting forward by 1 (staying within `maxMessages`). If that still isn’t a user, we shift backward by 1 (allowing `maxMessages + 1`).
 
 ### Strategy Combination Example
 
@@ -87,7 +113,8 @@ if (history.length > 50) {
 
 ## Example Integration
 
-See `examples/with-langchain.ts` for a runnable mock integration with a LangChain-style model.
+See `examples/LANGCHAIN_EXAMPLE.md` for a LangChain-style example.
+See `examples/OPENAI_EXAMPLE.md` for an OpenAI example (copy-paste snippet).
 
 ## API
 
@@ -98,10 +125,10 @@ See `examples/with-langchain.ts` for a runnable mock integration with a LangChai
 
 ### Interfaces
 
-- `Message`
-- `BaseMessage`
-- `IChatModel`
-- `ICompressor`
+- `SlimContextMessage`
+- `SlimContextChatModel`
+- `SlimContextCompressor`
+- `SlimContextModelResponse`
 
 ## License
 

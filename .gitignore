@@ -53,3 +53,5 @@ coverage/
 *.rej
 
 locales/
+
+*.tgz

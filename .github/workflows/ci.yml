@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+    tags: ['v*']
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.14.0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm run lint
+      - name: Prettier check
+        run: pnpm run format:check
+      - name: Build
+        run: pnpm run build
+      - name: Run tests
+        run: pnpm test
+
+  publish:
+    needs: build-test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.14.0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Verify tag matches package.json version
+        run: |
+          TAG_FROM_REF="${GITHUB_REF_NAME#v}"
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          echo "Tag: ${TAG_FROM_REF} | package.json: ${PKG_VERSION}"
+          if [ "$TAG_FROM_REF" != "$PKG_VERSION" ]; then
+            echo "Error: tag version ($TAG_FROM_REF) does not match package.json version ($PKG_VERSION)." >&2
+            exit 1
+          fi
+      - name: Build
+        run: pnpm run build
+      - name: Publish
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
