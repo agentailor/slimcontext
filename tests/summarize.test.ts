@@ -27,6 +27,29 @@ describe('SummarizeCompressor', () => {
     expect(result[0].content).toBe('sys');
     expect(result[1].content).toContain('fake summary');
   });
+
+  it("works when first message isn't system; only reserves summary", async () => {
+    const fakeModel: SlimContextChatModel = {
+      async invoke(_msgs: SlimContextMessage[]): Promise<SlimContextModelResponse> {
+        return { content: 'fake summary' };
+      },
+    };
+
+    const summarize = new SummarizeCompressor({ model: fakeModel, maxMessages: 6 });
+
+    // Start with user instead of system, then alternate and end with user
+    const history: SlimContextMessage[] = [];
+    for (let i = 0; i < 10; i++) {
+      const role = i % 2 === 0 ? 'user' : 'assistant';
+      history.push({ role: role as 'user' | 'assistant', content: `${role[0]}${i}` });
+    }
+
+    const result = await summarize.compress(history);
+    expect(result.length).toBeLessThanOrEqual(6);
+    expect(result[0].role).toBe('system'); // summary system (no original system preserved)
+    expect(result[0].content).toContain('fake summary');
+    expect(result[1].role).toBe('user'); // first kept remains aligned to user
+  });
 });
 
 describe('SummarizeCompressor split alignment', () => {

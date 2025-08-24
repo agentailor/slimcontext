@@ -9,7 +9,7 @@ Lightweight, model-agnostic chat history compression utilities for AI assistants
 - OpenAI: see `examples/OPENAI_EXAMPLE.md` (copy-paste snippet; BYOM, no deps added here).
 - LangChain: see `examples/LANGCHAIN_EXAMPLE.md` (adapts a LangChain chat model to `SlimContextChatModel`).
 
-## Features (v1.0)
+## Features
 
 - Trim strategy: keep the first (system) message and last N messages.
 - Summarize strategy: summarize the middle portion using your own chat model.

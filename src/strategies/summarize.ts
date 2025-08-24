@@ -1,7 +1,33 @@
 import { SlimContextCompressor, SlimContextChatModel, SlimContextMessage } from '../interfaces';
 
-const DEFAULT_SUMMARY_PROMPT =
-  'You are an expert conversation summarizer. Condense the following dialogue into a concise paragraph, retaining all key facts, entities, decisions, and user intent. Output only the summary.';
+const DEFAULT_SUMMARY_PROMPT = `
+You are an expert conversation summarizer. You'll receive an excerpt of a chat transcript to condense.
+
+Goals:
+- Be concise while retaining key facts, entities, user intent, decisions, follow-ups, and resolutions.
+- Preserve important numbers, dates, IDs (truncate if long), and constraints.
+
+When tool messages are present (role: tool or similar):
+- Briefly note which tool(s) were called, why (the user/assistant intent), and the high-level outcome.
+- Do NOT copy raw JSON, logs, or code. Extract only salient fields (e.g., status, count/total, top IDs, amounts, dates, error messages).
+- If outputs are very long, compress to 1–2 sentences. Truncate long IDs (e.g., abc…123) and omit secrets.
+- If multiple tools were called for the same purpose, summarize them together.
+- If a tool failed or contradicted prior assumptions, note the discrepancy.
+
+Output format:
+- Output only the summary as a single concise paragraph (2–5 sentences). No preface, no headings.
+
+Examples:
+Input (excerpt):
+user: Please find docs about OAuth token errors in our KB
+assistant: I will search the knowledge base
+assistant: calling search_kb with query "OAuth token expired"
+tool: { "results": [ { "title": "Token expired", "fix": "Refresh or sync clock" }, { "title": "Clock skew", "fix": "NTP sync" } ] }
+assistant: The docs suggest refreshing tokens and checking clock skew
+
+Summary:
+User requested guidance on OAuth token errors. Assistant searched the KB; the tool returned articles about token expiration and clock skew. Assistant advised refreshing tokens and ensuring time sync.
+`;
 
 export interface SummarizeConfig {
   model: SlimContextChatModel;
@@ -30,19 +56,24 @@ export class SummarizeCompressor implements SlimContextCompressor {
     this.summaryPrompt = config.prompt || DEFAULT_SUMMARY_PROMPT;
   }
 
+  /**
+   * Compress the conversation history by summarizing the middle portion.
+   */
   async compress(messages: SlimContextMessage[]): Promise<SlimContextMessage[]> {
     if (messages.length <= this.maxMessages) {
       return messages;
     }
 
-    const systemMessage = messages[0];
+    const hasSystemFirst = messages[0]?.role === 'system';
+    const systemMessage = hasSystemFirst ? messages[0] : undefined;
     // Decide where the kept tail should start (ensuring it starts with a user message when possible)
-    const startIdx = this.computeKeepStartIndex(messages);
+    const startIdx = this.computeKeepStartIndex(messages, hasSystemFirst);
     const messagesToKeep = messages.slice(startIdx);
 
     // Everything between the first system message and the slice we keep is summarized
     const endOfSummarizedIndex = startIdx; // non-inclusive
-    const messagesToSummarize = messages.slice(1, endOfSummarizedIndex);
+    const summarizeStart = hasSystemFirst ? 1 : 0;
+    const messagesToSummarize = messages.slice(summarizeStart, endOfSummarizedIndex);
 
     const conversationText = messagesToSummarize
       .map((msg) => `${msg.role}: ${msg.content}`)
@@ -61,7 +92,10 @@ export class SummarizeCompressor implements SlimContextCompressor {
       content: `[Context from a summarized portion of the conversation between you and the user]: ${summaryText}`,
     };
 
-    return [systemMessage, summaryMessage, ...messagesToKeep];
+    if (hasSystemFirst && systemMessage) {
+      return [systemMessage, summaryMessage, ...messagesToKeep];
+    }
+    return [summaryMessage, ...messagesToKeep];
   }
 
   /**
@@ -71,12 +105,14 @@ export class SummarizeCompressor implements SlimContextCompressor {
    * If the default split lands on a non-user, we first try shifting forward by 1 (<= maxMessages),
    * otherwise we try shifting backward by 1 (allowing maxMessages + 1 total).
    */
-  private computeKeepStartIndex(messages: SlimContextMessage[]): number {
-    const baseRecentBudget = this.maxMessages - 2;
+  private computeKeepStartIndex(messages: SlimContextMessage[], hasSystemFirst: boolean): number {
+    const reservedSlots = hasSystemFirst ? 2 : 1; // system? + summary
+    const baseRecentBudget = this.maxMessages - reservedSlots;
     let startIdx = messages.length - baseRecentBudget;
 
-    // Guardrails: ensure startIdx within [1, messages.length)
-    if (startIdx < 1) startIdx = 1;
+    // Guardrails: ensure startIdx within [minStart, messages.length)
+    const minStart = hasSystemFirst ? 1 : 0;
+    if (startIdx < minStart) startIdx = minStart;
     if (startIdx >= messages.length) startIdx = messages.length - 1;
 
     const firstKept = messages[startIdx];
@@ -89,7 +125,7 @@ export class SummarizeCompressor implements SlimContextCompressor {
         }
       }
       // Otherwise, try shifting backward by 1 (keeping one more, allowing +1 over max)
-      if (startIdx - 1 >= 1) {
+      if (startIdx - 1 >= minStart) {
         const candidateBack = messages[startIdx - 1];
         if (candidateBack.role === 'user') {
           return startIdx - 1;
