@@ -55,7 +55,7 @@ describe('LangChain Adapter', () => {
       expect(roleFromMessageType('ai')).toBe('assistant');
       expect(roleFromMessageType('human')).toBe('user');
       expect(roleFromMessageType('system')).toBe('system');
-      expect(roleFromMessageType('tool')).toBe('assistant');
+      expect(roleFromMessageType('tool')).toBe('tool');
       expect(roleFromMessageType('generic')).toBe('user');
     });
   });
