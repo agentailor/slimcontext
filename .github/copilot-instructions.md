@@ -7,7 +7,8 @@
 ### High-Level Repository Information
 
 - **Type**: TypeScript npm library/package
-- **Size**: ~24 source files, compiles to ~106MB total (including node_modules)
+- **Source Files**: ~24
+- **Installed Size**: ~106MB (including all dependencies in node_modules)
 - **Languages**: TypeScript (primary), JavaScript (compiled output)
 - **Target Runtime**: Node.js (CommonJS modules)
 - **Framework**: Model-agnostic, no AI framework dependencies
