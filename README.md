@@ -7,13 +7,14 @@ Lightweight, model-agnostic chat history compression utilities for AI assistants
 ## Examples
 
 - OpenAI: see `examples/OPENAI_EXAMPLE.md` (copy-paste snippet; BYOM, no deps added here).
-- LangChain: see `examples/LANGCHAIN_EXAMPLE.md` (adapts a LangChain chat model to `SlimContextChatModel`).
+- LangChain: see `examples/LANGCHAIN_EXAMPLE.md` and `examples/LANGCHAIN_COMPRESS_HISTORY.md`.
 
 ## Features
 
 - Trim strategy: keep the first (system) message and last N messages.
 - Summarize strategy: summarize the middle portion using your own chat model.
 - Framework agnostic: plug in any model wrapper implementing a minimal `invoke()` interface.
+- Optional LangChain adapter with a one-call helper for compressing histories.
 
 ## Installation
 
@@ -113,8 +114,48 @@ if (history.length > 50) {
 
 ## Example Integration
 
-See `examples/LANGCHAIN_EXAMPLE.md` for a LangChain-style example.
-See `examples/OPENAI_EXAMPLE.md` for an OpenAI example (copy-paste snippet).
+- See `examples/OPENAI_EXAMPLE.md` for an OpenAI copy-paste snippet.
+- See `examples/LANGCHAIN_EXAMPLE.md` for a LangChain-style integration.
+- See `examples/LANGCHAIN_COMPRESS_HISTORY.md` for a one-call LangChain history compression helper.
+
+## Adapters
+
+### LangChain
+
+If you already use LangChain chat models, you can use the built-in adapter. It’s exported in two ways:
+
+- Namespaced: `import { langchain } from 'slimcontext'`
+- Direct path: `import * as langchain from 'slimcontext/adapters/langchain'`
+
+Common helpers:
+
+- `compressLangChainHistory(history, options)` – one-call compression for LangChain `BaseMessage[]`.
+- `toSlimModel(llm)` – wrap a LangChain `BaseChatModel` for `SummarizeCompressor`.
+
+Example (one-call history compression):
+
+```ts
+import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { ChatOpenAI } from '@langchain/openai';
+import { langchain } from 'slimcontext';
+
+const lc = new ChatOpenAI({ model: 'gpt-4o-mini', temperature: 0 });
+
+const history = [
+  new SystemMessage('You are helpful.'),
+  new HumanMessage('Please summarize the discussion so far.'),
+  new AIMessage('Certainly!'),
+  // ...more messages
+];
+
+const compact = await langchain.compressLangChainHistory(history, {
+  strategy: 'summarize',
+  llm: lc, // BaseChatModel
+  maxMessages: 12,
+});
+```
+
+See `examples/LANGCHAIN_COMPRESS_HISTORY.md` for a fuller copy-paste example.
 
 ## API
 

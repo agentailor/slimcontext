@@ -1,9 +1,13 @@
 {
   "name": "slimcontext",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Lightweight, model-agnostic chat history compression (trim + summarize) for AI assistants.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./adapters/langchain": "./dist/adapters/langchain.js"
+  },
   "files": [
     "dist"
   ],
@@ -37,6 +41,14 @@
   },
   "homepage": "https://github.com/Agentailor/slimcontext#readme",
   "packageManager": "pnpm@10.14.0",
+  "peerDependencies": {
+    "@langchain/core": ">=0.2.0 <1"
+  },
+  "peerDependenciesMeta": {
+    "@langchain/core": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "eslint": "^8.57.0",
     "@types/node": "^24.3.0",
@@ -47,6 +59,7 @@
     "eslint-plugin-unused-imports": "^4.2.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "@langchain/core": "^0.2.36"
   }
 }
