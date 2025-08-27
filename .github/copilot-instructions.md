@@ -21,7 +21,7 @@
 
 ### Prerequisites and Environment Setup
 
-- **Node.js**: Version 20+ (as specified in CI)
+- **Node.js**: Version 20+ (as specified in the `engines` field of package.json)
 - **Package Manager**: pnpm 10.14.0 (preferred) or npm (fallback)
 
 ### Critical Build Steps (Always Follow This Order)
