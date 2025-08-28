@@ -145,7 +145,7 @@ The repository uses GitHub Actions CI that runs:
 - **Production**: Zero runtime dependencies (framework-agnostic design)
 - **Development**: TypeScript, ESLint, Prettier, vitest, various type definitions
 - **Optional peer**: `@langchain/core` (only if using the LangChain adapter). The adapter is exported under `slimcontext/adapters/langchain` and as a `langchain` namespace from the root export.
-- **Ignored Files**: dist/, node_modules/, examples/ (linting), *.tgz
+- **Ignored Files**: dist/, node_modules/, examples/ (linting), \*.tgz
 - **Distributed Files**: Only dist/ directory (compiled JS + .d.ts files)
 
 ## Validation and Testing
@@ -191,12 +191,12 @@ npm run test
 ### Adapters
 
 - LangChain adapter import options:
-   - Recommended (works across module systems): `import * as langchain from 'slimcontext/adapters/langchain'`
-   - Root namespace (available as a property on the root export; usage differs by module system):
-      - CommonJS: `const { langchain } = require('slimcontext')`
-      - ESM/TypeScript: `import * as slim from 'slimcontext'; const { langchain } = slim;`
-   - Note: `import { langchain } from 'slimcontext'` may not work in all environments due to CJS/ESM interop. Prefer one of the patterns above.
-   - Includes a one-call history helper: `compressLangChainHistory(history, options)`
+  - Recommended (works across module systems): `import * as langchain from 'slimcontext/adapters/langchain'`
+  - Root namespace (available as a property on the root export; usage differs by module system):
+    - CommonJS: `const { langchain } = require('slimcontext')`
+    - ESM/TypeScript: `import * as slim from 'slimcontext'; const { langchain } = slim;`
+  - Note: `import { langchain } from 'slimcontext'` may not work in all environments due to CJS/ESM interop. Prefer one of the patterns above.
+  - Includes a one-call history helper: `compressLangChainHistory(history, options)`
 
 ---
 
