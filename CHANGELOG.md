@@ -4,7 +4,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
-## [Unreleased] - 2025-08-24
+## [2.1.0] - 2025-08-27
+
+### Added
+
+- LangChain adapter under `src/adapters/langchain.ts` with helpers:
+  - `extractContent`, `roleFromMessageType`, `baseToSlim`, `slimToLangChain`
+  - `toSlimModel(llm)` wrapper to use LangChain `BaseChatModel` with `SummarizeCompressor`.
+  - `compressLangChainHistory(history, options)` high-level helper for one-call compression on `BaseMessage[]`.
+- Tests for adapter behavior in `tests/langchain.test.ts`.
+- Examples:
+  - `examples/LANGCHAIN_EXAMPLE.md`: adapting a LangChain model to `SlimContextChatModel`.
+  - `examples/LANGCHAIN_COMPRESS_HISTORY.md`: using `compressLangChainHistory` directly.
+
+### Changed
+
+- README updated with a LangChain adapter section and one-call usage sample.
+
+### Notes
+
+- The adapter treats LangChain `tool` messages as `assistant` during compression.
+- `@langchain/core` is an optional peer dependency; only needed if you use the adapter.
+
+## [2.0.0] - 2025-08-24
 
 ### Breaking
 

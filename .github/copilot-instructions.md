@@ -11,7 +11,7 @@
 - **Installed Size**: ~106MB (including all dependencies in node_modules)
 - **Languages**: TypeScript (primary), JavaScript (compiled output)
 - **Target Runtime**: Node.js (CommonJS modules)
-- **Framework**: Model-agnostic, no AI framework dependencies
+- **Framework**: Model-agnostic core; optional adapters (LangChain)
 - **Package Manager**: pnpm (preferred) or npm (fallback)
 - **Testing**: vitest
 - **Linting**: ESLint with TypeScript support
@@ -52,7 +52,7 @@
    npm run test
    # Runs all vitest tests
    # Duration: ~5-10 seconds
-   # Should show: "Test Files 2 passed (2), Tests 7 passed (7)"
+   # Should show: "Test Files 3 passed (3), Tests 16 passed (16)"
    ```
 
 4. **Format Code**
@@ -97,20 +97,24 @@ The repository uses GitHub Actions CI that runs:
 
 ```
 /
-├── src/                      # TypeScript source code
-│   ├── index.ts             # Main exports (TrimCompressor, SummarizeCompressor, interfaces)
-│   ├── interfaces.ts        # Core type definitions (SlimContextMessage, etc.)
-│   └── strategies/          # Compression strategy implementations
-│       ├── trim.ts          # TrimCompressor: keeps first + last N messages
-│       └── summarize.ts     # SummarizeCompressor: AI-powered summarization
-├── tests/                   # vitest test files
-│   ├── trim.test.ts        # Tests for TrimCompressor
-│   └── summarize.test.ts   # Tests for SummarizeCompressor
-├── examples/               # Documentation-only examples (not code)
-│   ├── OPENAI_EXAMPLE.md  # Copy-paste OpenAI integration
-│   └── LANGCHAIN_EXAMPLE.md # Copy-paste LangChain integration
-├── dist/                   # Compiled JavaScript output (generated)
-└── package.json           # npm package configuration
+├── src/                           # TypeScript source code
+│   ├── index.ts                  # Main exports (trim, summarize, interfaces, adapters namespace)
+│   ├── interfaces.ts             # Core type definitions (SlimContextMessage, etc.)
+│   ├── adapters/                 # Integration adapters (optional)
+│   │   └── langchain.ts          # LangChain adapter + helpers (compressLangChainHistory, toSlimModel)
+│   └── strategies/               # Compression strategy implementations
+│       ├── trim.ts               # TrimCompressor: keeps first + last N messages
+│       └── summarize.ts          # SummarizeCompressor: AI-powered summarization
+├── tests/                        # vitest test files
+│   ├── trim.test.ts             # Tests for TrimCompressor
+│   ├── summarize.test.ts        # Tests for SummarizeCompressor
+│   └── langchain.test.ts        # Tests for LangChain adapter + helper
+├── examples/                    # Documentation-only examples (not code)
+│   ├── OPENAI_EXAMPLE.md        # Copy-paste OpenAI integration
+│   ├── LANGCHAIN_EXAMPLE.md     # Copy-paste LangChain integration
+│   └── LANGCHAIN_COMPRESS_HISTORY.md # One-call compressLangChainHistory usage
+├── dist/                        # Compiled JavaScript output (generated)
+└── package.json                # npm package configuration
 ```
 
 ### Configuration Files
@@ -134,12 +138,13 @@ The repository uses GitHub Actions CI that runs:
 - **TrimCompressor**: Simple strategy keeping first (system) message + last N-1 messages
 - **SummarizeCompressor**: AI-powered strategy that summarizes middle conversations when exceeding maxMessages
 
-**Framework Independence**: No dependencies on OpenAI, LangChain, or other AI frameworks. Users implement the minimal `SlimContextChatModel` interface to connect their preferred model.
+**Framework Independence**: Core library has no framework dependencies. An optional LangChain adapter is provided for convenience; core remains BYOM.
 
 ### Dependencies and Build Artifacts
 
-- **Production**: Zero dependencies (framework-agnostic design)
+- **Production**: Zero runtime dependencies (framework-agnostic design)
 - **Development**: TypeScript, ESLint, Prettier, vitest, various type definitions
+- **Optional peer**: `@langchain/core` (only if using the LangChain adapter). The adapter is exported under `slimcontext/adapters/langchain` and as a `langchain` namespace from the root export.
 - **Ignored Files**: dist/, node_modules/, examples/ (linting), \*.tgz
 - **Distributed Files**: Only dist/ directory (compiled JS + .d.ts files)
 
@@ -149,8 +154,8 @@ The repository uses GitHub Actions CI that runs:
 
 ```bash
 npm run test
-# Expects: 7 tests across 2 files, all passing
-# Tests cover both TrimCompressor and SummarizeCompressor functionality
+# Expects: ~16 tests across 3 files, all passing
+# Tests cover TrimCompressor, SummarizeCompressor, and the LangChain adapter/helper
 ```
 
 ### Manual Verification Steps
@@ -181,6 +186,17 @@ npm run test
 - **src/interfaces.ts**: Core type definitions - modify for interface changes
 - **src/strategies/trim.ts**: Simple compression logic
 - **src/strategies/summarize.ts**: AI-powered compression with alignment logic
+- **src/adapters/langchain.ts**: LangChain adapter and helpers (`compressLangChainHistory`, `toSlimModel`, conversions)
+
+### Adapters
+
+- LangChain adapter import options:
+  - Recommended (works across module systems): `import * as langchain from 'slimcontext/adapters/langchain'`
+  - Root namespace (available as a property on the root export; usage differs by module system):
+    - CommonJS: `const { langchain } = require('slimcontext')`
+    - ESM/TypeScript: `import * as slim from 'slimcontext'; const { langchain } = slim;`
+  - Note: `import { langchain } from 'slimcontext'` may not work in all environments due to CJS/ESM interop. Prefer one of the patterns above.
+  - Includes a one-call history helper: `compressLangChainHistory(history, options)`
 
 ---
 
