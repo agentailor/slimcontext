@@ -111,7 +111,7 @@ describe('LangChain Adapter', () => {
       expect(invokeSpy).toHaveBeenCalled();
       expect(compressed).toHaveLength(4); // System + summary + 2 kept
       expect(compressed[0]).toBeInstanceOf(SystemMessage);
-      expect(compressed[1]).toBeInstanceOf(SystemMessage); // Summary is an AI message
+      expect(compressed[1]).toBeInstanceOf(SystemMessage); // Summary is an System Message
       expect(compressed[1].content).toContain('This is a summary of messages 1 and 2.');
       expect(compressed[2].content).toBe('Message 3');
       expect(compressed[3].content).toBe('Message 4');

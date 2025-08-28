@@ -1,5 +1,8 @@
 import { SlimContextCompressor, SlimContextMessage } from '../interfaces';
 
+/**
+ * Trim configuration options for the TrimCompressor (messages to keep).
+ */
 export interface TrimConfig {
   messagesToKeep: number;
 }

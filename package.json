@@ -42,7 +42,7 @@
   "homepage": "https://github.com/Agentailor/slimcontext#readme",
   "packageManager": "pnpm@10.14.0",
   "peerDependencies": {
-    "@langchain/core": ">=0.2.0 <1"
+    "@langchain/core": ">=0.3.71 <1"
   },
   "peerDependenciesMeta": {
     "@langchain/core": {
@@ -60,6 +60,6 @@
     "prettier": "^3.6.2",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4",
-    "@langchain/core": "^0.2.36"
+    "@langchain/core": "^0.3.71"
   }
 }

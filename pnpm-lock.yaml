@@ -8,8 +8,8 @@ importers:
   .:
     devDependencies:
       '@langchain/core':
-        specifier: ^0.2.36
-        version: 0.2.36
+        specifier: ^0.3.71
+        version: 0.3.72
       '@types/node':
         specifier: ^24.3.0
         version: 24.3.0
@@ -42,6 +42,12 @@ importers:
         version: 3.2.4(@types/node@24.3.0)
 
 packages:
+  '@cfworker/json-schema@4.1.1':
+    resolution:
+      {
+        integrity: sha512-gAmrUZSGtKc3AiBL71iNWxDsyUC5uMaKKGdvzYsBoTW/xi42JQHl7eKV2OYzCUqvc+D2RCcf7EXY2iCyFIk6og==,
+      }
+
   '@esbuild/aix-ppc64@0.21.5':
     resolution:
       {
@@ -307,10 +313,10 @@ packages:
         integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==,
       }
 
-  '@langchain/core@0.2.36':
+  '@langchain/core@0.3.72':
     resolution:
       {
-        integrity: sha512-qHLvScqERDeH7y2cLuJaSAlMwg3f/3Oc9nayRSXRU2UuaK/SOhI42cxiPLj1FnuHJSmN0rBQFkrLx02gI4mcVg==,
+        integrity: sha512-WsGWVZYnlKffj2eEfDocPNiaTRoxyYiLSQdQ7oxZvxGZBqo/90vpjbC33UGK1uPNBM4kT+pkdaol/MnvKUh8TQ==,
       }
     engines: { node: '>=18' }
 
@@ -907,17 +913,16 @@ packages:
         integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==,
       }
 
-  commander@10.0.1:
-    resolution:
-      {
-        integrity: sha512-y4Mg2tXshplEbSGzx7amzPwKKOCGuoSRP/CjEdwwk0FOGlUbq6lKuoyDZTNZkmxHdJtp54hdfY/JUrdL7Xfdug==,
-      }
-    engines: { node: '>=14' }
-
   concat-map@0.0.1:
     resolution:
       {
         integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==,
+      }
+
+  console-table-printer@2.14.6:
+    resolution:
+      {
+        integrity: sha512-MCBl5HNVaFuuHW6FGbL/4fB7N/ormCy+tQ+sxTrF6QtSbSNETvPuOVbkJBhzDgYhvjWGrTma4eYJa37ZuoQsPw==,
       }
 
   cross-spawn@7.0.6:
@@ -1770,14 +1775,23 @@ packages:
         integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==,
       }
 
-  langsmith@0.1.68:
+  langsmith@0.3.64:
     resolution:
       {
-        integrity: sha512-otmiysWtVAqzMx3CJ4PrtUBhWRG5Co8Z4o7hSZENPjlit9/j3/vm3TSvbaxpDYakZxtMjhkcJTqrdYFipISEiQ==,
+        integrity: sha512-67yccwrREK5pgVX7PktkUImbNT4bQpSPH7SETSPYZ+X42OpGGAABU4s+pNV/55/ke+INrmpXXlKxfMpZOCrzQA==,
       }
     peerDependencies:
+      '@opentelemetry/api': '*'
+      '@opentelemetry/exporter-trace-otlp-proto': '*'
+      '@opentelemetry/sdk-trace-base': '*'
       openai: '*'
     peerDependenciesMeta:
+      '@opentelemetry/api':
+        optional: true
+      '@opentelemetry/exporter-trace-otlp-proto':
+        optional: true
+      '@opentelemetry/sdk-trace-base':
+        optional: true
       openai:
         optional: true
 
@@ -2263,6 +2277,12 @@ packages:
         integrity: sha512-ybx0WO1/8bSBLEWXZvEd7gMW3Sn3JFlW3TvX1nREbDLRNQNaeNN8WK0meBwPdAaOI7TtRRRJn/Es1zhrrCHu7g==,
       }
 
+  simple-wcswidth@1.1.2:
+    resolution:
+      {
+        integrity: sha512-j7piyCjAeTDSjzTSQ7DokZtMNwNlEAyxqSZeCS+CXH7fJ4jx3FuJ/mTW3mE+6JLs4VJBbcll0Kjn+KXI5t21Iw==,
+      }
+
   source-map-js@1.2.1:
     resolution:
       {
@@ -2647,6 +2667,8 @@ packages:
       }
 
 snapshots:
+  '@cfworker/json-schema@4.1.1': {}
+
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
 
@@ -2753,13 +2775,14 @@ snapshots:
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
 
-  '@langchain/core@0.2.36':
+  '@langchain/core@0.3.72':
     dependencies:
+      '@cfworker/json-schema': 4.1.1
       ansi-styles: 5.2.0
       camelcase: 6.3.0
       decamelize: 1.2.0
       js-tiktoken: 1.0.21
-      langsmith: 0.1.68
+      langsmith: 0.3.64
       mustache: 4.2.0
       p-queue: 6.6.2
       p-retry: 4.6.2
@@ -2767,6 +2790,9 @@ snapshots:
       zod: 3.25.76
       zod-to-json-schema: 3.24.6(zod@3.25.76)
     transitivePeerDependencies:
+      - '@opentelemetry/api'
+      - '@opentelemetry/exporter-trace-otlp-proto'
+      - '@opentelemetry/sdk-trace-base'
       - openai
 
   '@nodelib/fs.scandir@2.1.5':
@@ -3140,9 +3166,11 @@ snapshots:
 
   color-name@1.1.4: {}
 
-  commander@10.0.1: {}
-
   concat-map@0.0.1: {}
+
+  console-table-printer@2.14.6:
+    dependencies:
+      simple-wcswidth: 1.1.2
 
   cross-spawn@7.0.6:
     dependencies:
@@ -3757,10 +3785,11 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  langsmith@0.1.68:
+  langsmith@0.3.64:
     dependencies:
       '@types/uuid': 10.0.0
-      commander: 10.0.1
+      chalk: 4.1.2
+      console-table-printer: 2.14.6
       p-queue: 6.6.2
       p-retry: 4.6.2
       semver: 7.7.2
@@ -4070,6 +4099,8 @@ snapshots:
       side-channel-weakmap: 1.0.2
 
   siginfo@2.0.0: {}
+
+  simple-wcswidth@1.1.2: {}
 
   source-map-js@1.2.1: {}
 

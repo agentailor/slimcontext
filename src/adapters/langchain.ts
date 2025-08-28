@@ -1,5 +1,14 @@
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import {
+  AIMessage,
+  BaseMessage,
+  HumanMessage,
+  isAIMessage,
+  SystemMessage,
+  isHumanMessage,
+  isSystemMessage,
+  isToolMessage,
+} from '@langchain/core/messages';
 
 import {
   SummarizeCompressor,
@@ -35,8 +44,8 @@ export function extractContent(content: unknown): string {
 }
 
 /**
- * Normalize LangChain BaseMessage.getType() to SlimContext role.
- * Tool messages are treated as assistant for compression purposes.
+ * Normalize LangChain BaseMessage.getType() (e.g., 'ai', 'human', or 'AIMessage', 'HumanMessage')
+ * to a SlimContext role.
  */
 export function roleFromMessageType(type: string): 'user' | 'assistant' | 'system' | 'tool' {
   switch (type) {
@@ -52,10 +61,23 @@ export function roleFromMessageType(type: string): 'user' | 'assistant' | 'syste
   }
 }
 
+/**
+ * Determine a LangChain BaseMessage type
+ * @param msg
+ * @returns
+ */
+export function getLangChainMessageType(msg: BaseMessage): string {
+  if (isAIMessage(msg)) return 'ai';
+  if (isHumanMessage(msg)) return 'human';
+  if (isSystemMessage(msg)) return 'system';
+  if (isToolMessage(msg)) return 'tool';
+
+  return 'human';
+}
+
 /** Convert a LangChain BaseMessage to a SlimContextMessage used by compression. */
 export function baseToSlim(msg: BaseMessage): SlimContextMessage {
-  const t = msg as unknown as { _getType?: () => string; getType?: () => string };
-  const type = t._getType?.() ?? t.getType?.() ?? 'human';
+  const type = getLangChainMessageType(msg);
   return {
     role: roleFromMessageType(type),
     content: extractContent(msg.content as unknown),
@@ -99,7 +121,7 @@ export class LangChainSlimModel implements SlimContextChatModel {
   async invoke(messages: SlimContextMessage[]): Promise<SlimContextModelResponse> {
     // Convert to LangChain BaseMessage instances
     const lcMessages = messages.map(slimToLangChain);
-    const res = await this.llm.invoke(lcMessages as unknown as BaseMessage[]);
+    const res = await this.llm.invoke(lcMessages);
     const content = extractContent((res as unknown as { content?: unknown })?.content);
     return { content };
   }
