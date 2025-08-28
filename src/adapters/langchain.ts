@@ -24,6 +24,7 @@ import {
 /**
  * Extract plain text from a LangChain message content, which may be a string
  * or an array of content parts that could include text entries.
+ * Only text content is extracted; other content types (such as images or non-text parts) are ignored.
  */
 export function extractContent(content: unknown): string {
   if (typeof content === 'string') return content.trim();
