@@ -22,13 +22,17 @@ const history = [
 const compact = await langchain.compressLangChainHistory(history, {
   strategy: 'summarize',
   llm, // pass your BaseChatModel
-  maxMessages: 12, // target total messages after compression (system + summary + recent)
+  maxModelTokens: 8192,
+  thresholdPercent: 0.8,
+  minRecentMessages: 4,
 });
 
 // Alternatively, use trimming without an LLM:
 const trimmed = await langchain.compressLangChainHistory(history, {
   strategy: 'trim',
-  messagesToKeep: 8,
+  maxModelTokens: 8192,
+  thresholdPercent: 0.8,
+  minRecentMessages: 4,
 });
 
 console.log('Original size:', history.length);
@@ -39,4 +43,4 @@ console.log('Trimmed size:', trimmed.length);
 Notes
 
 - `@langchain/core` is an optional peer dependency. Install it only if you use the adapter.
-- `maxMessages` must be at least 4 for summarize (system + summary + 2 recent).
+- Summarize strategy summarizes older content when total tokens exceed `thresholdPercent * maxModelTokens`.

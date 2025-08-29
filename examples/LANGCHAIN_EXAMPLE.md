@@ -37,7 +37,12 @@ class LangChainModel implements SlimContextChatModel {
 }
 
 async function compress(history: SlimContextMessage[]) {
-  const summarize = new SummarizeCompressor({ model: new LangChainModel(), maxMessages: 12 });
+  const summarize = new SummarizeCompressor({
+    model: new LangChainModel(),
+    maxModelTokens: 8192,
+    thresholdPercent: 0.75,
+    minRecentMessages: 4,
+  });
   return summarize.compress(history);
 }
 

@@ -33,7 +33,12 @@ async function main() {
     // ... conversation grows
   ];
 
-  const summarize = new SummarizeCompressor({ model: new OpenAIModel(), maxMessages: 10 });
+  const summarize = new SummarizeCompressor({
+    model: new OpenAIModel(),
+    maxModelTokens: 128000,
+    thresholdPercent: 0.8,
+    minRecentMessages: 4,
+  });
   const compressed = await summarize.compress(history);
 
   const completion = await client.chat.completions.create({

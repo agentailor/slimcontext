@@ -1,6 +1,6 @@
 {
   "name": "slimcontext",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Lightweight, model-agnostic chat history compression (trim + summarize) for AI assistants.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "prepare": "npm run build",
+    "prepare": "pnpm run build",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint . --ext .ts,.tsx --max-warnings=0",

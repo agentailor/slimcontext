@@ -26,6 +26,32 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - The adapter treats LangChain `tool` messages as `assistant` during compression.
 - `@langchain/core` is an optional peer dependency; only needed if you use the adapter.
 
+## [2.2.0] - 2025-08-28
+
+### Breaking
+
+- Strategies are now token-threshold based instead of message-count based.
+  - `TrimCompressor({ messagesToKeep })` replaced by `TrimCompressor({ maxModelTokens?, thresholdPercent?, estimateTokens?, minRecentMessages? })`.
+  - `SummarizeCompressor({ model, maxMessages, ... })` replaced by `SummarizeCompressor({ model, maxModelTokens?, thresholdPercent?, estimateTokens?, minRecentMessages?, prompt? })`.
+
+### Migration
+
+- Provide your model’s context window via `maxModelTokens` (optional; defaults to 8192).
+- Choose a `thresholdPercent` (0–1) at which to trigger compression (default 0.7; recommended 0.8–0.9 for aggressive usage).
+- Optional: pass a custom `estimateTokens` to better approximate token usage.
+- Optional: tune `minRecentMessages` (trim: default 2, summarize: default 4).
+- Update adapter/example usages accordingly (README and examples have been updated).
+
+### Changed
+
+- Trim: when total estimated tokens exceed threshold, drop oldest non-system messages until under threshold, preserving system messages and the most recent messages.
+- Summarize: when over threshold, summarize the oldest portion (excluding a leading system message) and insert a synthetic system summary before recent messages.
+
+### Added
+
+- `TokenEstimator` type for custom token estimation.
+- Docs and examples updated to reflect token-based configuration.
+
 ## [2.0.0] - 2025-08-24
 
 ### Breaking
@@ -41,7 +67,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
   - `IChatModel` -> `SlimContextChatModel`
   - `ICompressor` -> `SlimContextCompressor`
 
-Migration notes:
+### Migration
 
 - Import and use `SlimContextMessage` everywhere you previously used `Message` or `BaseMessage`.
 - Update any custom `IChatModel` implementations to accept `SlimContextMessage[]`.

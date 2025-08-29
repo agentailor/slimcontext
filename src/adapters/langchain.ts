@@ -133,7 +133,7 @@ export function toSlimModel(llm: BaseChatModel): SlimContextChatModel {
   return new LangChainSlimModel(llm);
 }
 
-/** Convenience: build a SummarizeCompressor for LangChain models. */
+/** Convenience: build a SummarizeCompressor for LangChain models (token-threshold based). */
 export function createSummarizeCompressorForLangChain(
   llm: BaseChatModel,
   config: Omit<SummarizeConfig, 'model'>,
@@ -141,11 +141,19 @@ export function createSummarizeCompressorForLangChain(
   return new SummarizeCompressor({ model: toSlimModel(llm), ...config });
 }
 
-/** Convenience: build a TrimCompressor. */
+/** Convenience: build a TrimCompressor (token-threshold based). */
 export function createTrimCompressor(config: TrimConfig): TrimCompressor {
   return new TrimCompressor(config);
 }
 
+/**
+ * Options for compressLangChainHistory (token-threshold based).
+ *
+ * Provide one of:
+ * - { compressor }: a pre-built SlimContextCompressor instance
+ * - summarize: { strategy?: 'summarize', llm, maxModelTokens?, thresholdPercent?, estimateTokens?, minRecentMessages?, prompt? }
+ * - trim: { strategy: 'trim', maxModelTokens?, thresholdPercent?, estimateTokens?, minRecentMessages? }
+ */
 export type CompressLangChainOptions =
   | { compressor: SlimContextCompressor }
   | ({
@@ -157,6 +165,9 @@ export type CompressLangChainOptions =
 /**
  * High-level helper: compress a LangChain message history in one call.
  * - Converts LC -> SlimContext, runs a compressor, and converts the result back.
+ * - Strategies trigger when estimated total tokens exceed `thresholdPercent * maxModelTokens`.
+ * - For summarize, older content is summarized and a system summary is inserted before recent messages.
+ * - For trim, oldest non-system messages are dropped until under threshold, preserving system + recent.
  */
 export async function compressLangChainHistory(
   history: BaseMessage[],
