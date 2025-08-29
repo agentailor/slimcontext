@@ -152,7 +152,7 @@ import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages
 import { ChatOpenAI } from '@langchain/openai';
 import { langchain } from 'slimcontext';
 
-const lc = new ChatOpenAI({ model: 'gpt-4o-mini', temperature: 0 });
+const lc = new ChatOpenAI({ model: 'gpt-5-mini', temperature: 0 });
 
 const history = [
   new SystemMessage('You are helpful.'),

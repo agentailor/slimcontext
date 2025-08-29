@@ -8,7 +8,7 @@ import { ChatOpenAI } from '@langchain/openai';
 import { langchain } from 'slimcontext';
 
 // 1) Create your LangChain chat model (any BaseChatModel works)
-const llm = new ChatOpenAI({ model: 'gpt-4o-mini', temperature: 0 });
+const llm = new ChatOpenAI({ model: 'gpt-5-mini', temperature: 0 });
 
 // 2) Build your existing LangChain-compatible history
 const history = [
