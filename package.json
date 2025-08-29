@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "prepare": "pnpm run build",
+    "prepare": "npm run build",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint . --ext .ts,.tsx --max-warnings=0",
