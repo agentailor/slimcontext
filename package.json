@@ -1,6 +1,6 @@
 {
   "name": "slimcontext",
-  "version": "2.2.0",
+  "version": "2.1.0",
   "description": "Lightweight, model-agnostic chat history compression (trim + summarize) for AI assistants.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
