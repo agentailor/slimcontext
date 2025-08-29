@@ -16,7 +16,7 @@ const client = new OpenAI();
 class OpenAIModel implements SlimContextChatModel {
   async invoke(msgs: SlimContextMessage[]): Promise<SlimContextModelResponse> {
     const response = await client.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-5-mini',
       messages: msgs.map((m) => ({
         role: m.role === 'human' ? 'user' : (m.role as 'system' | 'user' | 'assistant'),
         content: m.content,
@@ -33,11 +33,16 @@ async function main() {
     // ... conversation grows
   ];
 
-  const summarize = new SummarizeCompressor({ model: new OpenAIModel(), maxMessages: 10 });
+  const summarize = new SummarizeCompressor({
+    model: new OpenAIModel(),
+    maxModelTokens: 128000,
+    thresholdPercent: 0.8,
+    minRecentMessages: 4,
+  });
   const compressed = await summarize.compress(history);
 
   const completion = await client.chat.completions.create({
-    model: 'gpt-4o-mini',
+    model: 'gpt-5-mini',
     messages: compressed
       .filter((m) => m.role !== 'tool')
       .map((m) => ({ role: m.role as 'system' | 'user' | 'assistant', content: m.content })),

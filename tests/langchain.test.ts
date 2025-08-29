@@ -87,10 +87,14 @@ describe('LangChain Adapter', () => {
     it('should compress history with the trim strategy', async () => {
       const compressed = await compressLangChainHistory(history, {
         strategy: 'trim',
-        messagesToKeep: 3,
+        maxModelTokens: 400,
+        thresholdPercent: 0.5,
+        minRecentMessages: 2,
+        estimateTokens: () => 150, // each message ~150 tokens
       });
-
-      expect(compressed).toHaveLength(3); // System + 2 kept
+      // System (150) + last two messages (300) = 450 > threshold 200, but
+      // our TrimCompressor preserves last two regardless; will drop earlier non-systems.
+      expect(compressed.length).toBe(3);
       expect(compressed[0]).toBeInstanceOf(SystemMessage);
       expect(compressed[1]).toBeInstanceOf(HumanMessage);
       expect(compressed[1].content).toBe('Message 3');
@@ -105,11 +109,15 @@ describe('LangChain Adapter', () => {
       const compressed = await compressLangChainHistory(history, {
         strategy: 'summarize',
         llm: mockModel,
-        maxMessages: 4,
+        maxModelTokens: 300,
+        thresholdPercent: 0.5,
+        estimateTokens: () => 100,
+        minRecentMessages: 2,
       });
 
       expect(invokeSpy).toHaveBeenCalled();
-      expect(compressed).toHaveLength(4); // System + summary + 2 kept
+      // Should be: system + summary + last 2 messages
+      expect(compressed).toHaveLength(4);
       expect(compressed[0]).toBeInstanceOf(SystemMessage);
       expect(compressed[1]).toBeInstanceOf(SystemMessage); // Summary is an System Message
       expect(compressed[1].content).toContain('This is a summary of messages 1 and 2.');

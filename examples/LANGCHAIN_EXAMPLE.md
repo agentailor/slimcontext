@@ -12,7 +12,7 @@ import {
 import { ChatOpenAI } from '@langchain/openai'; // or any LangChain chat model
 
 // Create a LangChain model (reads from env, e.g., OPENAI_API_KEY)
-const lc = new ChatOpenAI({ model: 'gpt-4o-mini', temperature: 0 });
+const lc = new ChatOpenAI({ model: 'gpt-5-mini', temperature: 0 });
 
 class LangChainModel implements SlimContextChatModel {
   async invoke(messages: SlimContextMessage[]): Promise<SlimContextModelResponse> {
@@ -37,7 +37,12 @@ class LangChainModel implements SlimContextChatModel {
 }
 
 async function compress(history: SlimContextMessage[]) {
-  const summarize = new SummarizeCompressor({ model: new LangChainModel(), maxMessages: 12 });
+  const summarize = new SummarizeCompressor({
+    model: new LangChainModel(),
+    maxModelTokens: 8192,
+    thresholdPercent: 0.75,
+    minRecentMessages: 4,
+  });
   return summarize.compress(history);
 }
 

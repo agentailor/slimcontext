@@ -34,12 +34,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Agentailor/slimcontext.git"
+    "url": "git+https://github.com/agentailor/slimcontext.git"
   },
   "bugs": {
-    "url": "https://github.com/Agentailor/slimcontext/issues"
+    "url": "https://github.com/agentailor/slimcontext/issues"
   },
-  "homepage": "https://github.com/Agentailor/slimcontext#readme",
+  "homepage": "https://github.com/agentailor/slimcontext#readme",
   "packageManager": "pnpm@10.14.0",
   "peerDependencies": {
     "@langchain/core": ">=0.3.71 <1"

@@ -7,8 +7,6 @@
 ### High-Level Repository Information
 
 - **Type**: TypeScript npm library/package
-- **Source Files**: ~24
-- **Installed Size**: ~106MB (including all dependencies in node_modules)
 - **Languages**: TypeScript (primary), JavaScript (compiled output)
 - **Target Runtime**: Node.js (CommonJS modules)
 - **Framework**: Model-agnostic core; optional adapters (LangChain)
@@ -21,7 +19,7 @@
 
 ### Prerequisites and Environment Setup
 
-- **Node.js**: Version 20+ (as specified in the `engines` field of package.json)
+- **Node.js**: Version 20+ (recommended)
 - **Package Manager**: pnpm 10.14.0 (preferred) or npm (fallback)
 
 ### Critical Build Steps (Always Follow This Order)
@@ -41,42 +39,39 @@
 2. **Build the Project**
 
    ```bash
-   npm run build
+   pnpm run build
    # Compiles TypeScript to dist/ directory
-   # Duration: ~5-10 seconds
    ```
 
 3. **Run Tests**
 
    ```bash
-   npm run test
+   pnpm run test
    # Runs all vitest tests
-   # Duration: ~5-10 seconds
-   # Should show: "Test Files 3 passed (3), Tests 16 passed (16)"
+   # All tests should pass
    ```
 
 4. **Format Code**
 
    ```bash
-   npm run format        # Auto-format code
-   npm run format:check  # Check formatting without changes
+   pnpm run format        # Auto-format code
+   pnpm run format:check  # Check formatting without changes
    ```
 
 5. **Lint Code (Known Issue)**
    ```bash
-   npm run lint
+   pnpm run lint
    ```
-   **KNOWN ISSUE**: ESLint currently fails with "parserOptions.tsconfigRootDir must be an absolute path" error. This is a configuration bug but doesn't affect build or tests. The code itself is properly linted in CI environment.
 
 ### Complete Development Workflow
 
 ```bash
 # Clean start (recommended for agents):
 rm -rf node_modules dist
-npm install           # Always use npm for reliability
-npm run test         # Verify tests pass
-npm run format:check # Verify formatting
-npm run build        # Final build
+pnpm install           # Always use pnpm for reliability
+pnpm run test         # Verify tests pass
+pnpm run format:check # Verify formatting
+pnpm run build        # Final build
 ```
 
 ### CI/CD Pipeline Validation
@@ -103,8 +98,9 @@ The repository uses GitHub Actions CI that runs:
 │   ├── adapters/                 # Integration adapters (optional)
 │   │   └── langchain.ts          # LangChain adapter + helpers (compressLangChainHistory, toSlimModel)
 │   └── strategies/               # Compression strategy implementations
-│       ├── trim.ts               # TrimCompressor: keeps first + last N messages
-│       └── summarize.ts          # SummarizeCompressor: AI-powered summarization
+│       ├── common.ts             # Shared token-budget utilities & defaults (thresholds, estimator)
+│       ├── trim.ts               # TrimCompressor: token-threshold trimming (preserve system + recent)
+│       └── summarize.ts          # SummarizeCompressor: token-threshold summarization (inject summary)
 ├── tests/                        # vitest test files
 │   ├── trim.test.ts             # Tests for TrimCompressor
 │   ├── summarize.test.ts        # Tests for SummarizeCompressor
@@ -132,11 +128,19 @@ The repository uses GitHub Actions CI that runs:
 - `SlimContextMessage`: Standard message format with role ('system'|'user'|'assistant'|'tool'|'human') and content
 - `SlimContextChatModel`: BYOM interface requiring only `invoke(messages) -> response`
 - `SlimContextCompressor`: Strategy interface for compression implementations
+- `TokenEstimator`: `(message) => number` callback used for model-agnostic token budgeting
 
 **Compression Strategies**:
 
-- **TrimCompressor**: Simple strategy keeping first (system) message + last N-1 messages
-- **SummarizeCompressor**: AI-powered strategy that summarizes middle conversations when exceeding maxMessages
+- Token-threshold based design using the model’s max token window and a configurable threshold (default 70%).
+- Shared config shape (TokenBudgetConfig): `{ maxModelTokens?, thresholdPercent?, estimateTokens?, minRecentMessages? }`.
+- **TrimCompressor**: Drops the oldest non-system messages until estimated tokens fall below the threshold, while always preserving any system message(s) and at least the most recent `minRecentMessages`.
+- **SummarizeCompressor**: When over threshold, summarizes all messages before the recent tail (excluding the leading system message if present) and inserts a synthetic system summary just before the preserved recent messages.
+
+**Shared Utilities** (src/strategies/common.ts):
+
+- Defaults: `DEFAULT_MAX_MODEL_TOKENS = 8192`, `DEFAULT_THRESHOLD_PERCENT = 0.7`, `DEFAULT_MIN_RECENT_MESSAGES = 2`.
+- Estimator: `DEFAULT_ESTIMATOR` (~`len/4 + 2`) plus `computeThresholdTokens`, `normalizeBudgetConfig` helpers.
 
 **Framework Independence**: Core library has no framework dependencies. An optional LangChain adapter is provided for convenience; core remains BYOM.
 
@@ -153,8 +157,8 @@ The repository uses GitHub Actions CI that runs:
 ### Running Tests
 
 ```bash
-npm run test
-# Expects: ~16 tests across 3 files, all passing
+pnpm run test
+# Expects: All tests to pass
 # Tests cover TrimCompressor, SummarizeCompressor, and the LangChain adapter/helper
 ```
 
@@ -196,7 +200,7 @@ npm run test
     - CommonJS: `const { langchain } = require('slimcontext')`
     - ESM/TypeScript: `import * as slim from 'slimcontext'; const { langchain } = slim;`
   - Note: `import { langchain } from 'slimcontext'` may not work in all environments due to CJS/ESM interop. Prefer one of the patterns above.
-  - Includes a one-call history helper: `compressLangChainHistory(history, options)`
+  - Includes a one-call history helper: `compressLangChainHistory(history, options)` where `options` accepts the token-threshold fields (`maxModelTokens`, `thresholdPercent`, `estimateTokens`, `minRecentMessages`) and either `strategy: 'trim'` or `strategy: 'summarize'` with `llm` for the latter.
 
 ---
 

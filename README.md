@@ -11,8 +11,8 @@ Lightweight, model-agnostic chat history compression utilities for AI assistants
 
 ## Features
 
-- Trim strategy: keep the first (system) message and last N messages.
-- Summarize strategy: summarize the middle portion using your own chat model.
+- Trim strategy: token-aware trimming based on your model's max tokens and a threshold.
+- Summarize strategy: token-aware summarization of older messages using your own chat model.
 - Framework agnostic: plug in any model wrapper implementing a minimal `invoke()` interface.
 - Optional LangChain adapter with a one-call helper for compressing histories.
 
@@ -21,6 +21,12 @@ Lightweight, model-agnostic chat history compression utilities for AI assistants
 ```bash
 npm install slimcontext
 ```
+
+## Migration
+
+Upgrading from an earlier version? See the Migration notes in the changelog:
+
+- CHANGELOG: ./CHANGELOG.md#migration
 
 ## Core Concepts
 
@@ -55,7 +61,15 @@ interface SlimContextMessage {
 ```ts
 import { TrimCompressor, SlimContextMessage } from 'slimcontext';
 
-const compressor = new TrimCompressor({ messagesToKeep: 8 });
+// Configure token-aware trimming
+const compressor = new TrimCompressor({
+  // Optional: defaults shown
+  maxModelTokens: 8192, // your model's context window
+  thresholdPercent: 0.7, // start trimming after 70% of maxModelTokens
+  minRecentMessages: 2, // always keep at least last 2 messages
+  // Optional estimator; default is a len/4 heuristic
+  // estimateTokens: (m) => yourCustomTokenCounter(m),
+});
 
 let history: SlimContextMessage[] = [
   { role: 'system', content: 'You are a helpful assistant.' },
@@ -84,7 +98,15 @@ class MyModel implements SlimContextChatModel {
 }
 
 const model = new MyModel();
-const compressor = new SummarizeCompressor({ model, maxMessages: 12 });
+const compressor = new SummarizeCompressor({
+  model,
+  // Optional: defaults shown
+  maxModelTokens: 8192,
+  thresholdPercent: 0.7, // summarize once total tokens exceed 70%
+  minRecentMessages: 4, // keep at least last 4 messages verbatim
+  // estimateTokens: (m) => yourCustomTokenCounter(m),
+  // prompt: '...custom summarization instructions...'
+});
 
 let history: SlimContextMessage[] = [
   { role: 'system', content: 'You are a helpful assistant.' },
@@ -96,21 +118,12 @@ history = await compressor.compress(history);
 
 Notes about summarization behavior
 
-- Alignment: after compression, messages will start with `[system, summary, ...]`, and the first kept message after the summary is always a `user` turn. This preserves dialogue consistency.
-- Size: to keep this alignment and preserve recency, the output length can be `maxMessages - 1`, `maxMessages`, or `maxMessages + 1`.
-  - Preference: if the default split lands on an assistant, we first try shifting forward by 1 (staying within `maxMessages`). If that still isn’t a user, we shift backward by 1 (allowing `maxMessages + 1`).
+- When the estimated total tokens exceed the threshold, the oldest portion (excluding a leading system message) is summarized into a single system message inserted before the recent tail.
+- The most recent `minRecentMessages` are always preserved verbatim.
 
 ### Strategy Combination Example
 
-You can chain strategies depending on size thresholds:
-
-```ts
-if (history.length > 50) {
-  history = await summarizeCompressor.compress(history);
-} else if (history.length > 25) {
-  history = await trimCompressor.compress(history);
-}
-```
+You can chain strategies depending on token thresholds or other heuristics.
 
 ## Example Integration
 
@@ -139,7 +152,7 @@ import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages
 import { ChatOpenAI } from '@langchain/openai';
 import { langchain } from 'slimcontext';
 
-const lc = new ChatOpenAI({ model: 'gpt-4o-mini', temperature: 0 });
+const lc = new ChatOpenAI({ model: 'gpt-5-mini', temperature: 0 });
 
 const history = [
   new SystemMessage('You are helpful.'),
@@ -151,7 +164,9 @@ const history = [
 const compact = await langchain.compressLangChainHistory(history, {
   strategy: 'summarize',
   llm: lc, // BaseChatModel
-  maxMessages: 12,
+  maxModelTokens: 8192,
+  thresholdPercent: 0.8, // summarize beyond 80% of context window
+  minRecentMessages: 4,
 });
 ```
 
@@ -161,8 +176,8 @@ See `examples/LANGCHAIN_COMPRESS_HISTORY.md` for a fuller copy-paste example.
 
 ### Classes
 
-- `TrimCompressor({ messagesToKeep })`
-- `SummarizeCompressor({ model, maxMessages, prompt? })`
+- `TrimCompressor({ maxModelTokens?, thresholdPercent?, estimateTokens?, minRecentMessages? })`
+- `SummarizeCompressor({ model, maxModelTokens?, thresholdPercent?, estimateTokens?, minRecentMessages?, prompt? })`
 
 ### Interfaces
 
