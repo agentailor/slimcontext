@@ -3,7 +3,7 @@ import type { SlimContextMessage, TokenBudgetConfig, TokenEstimator } from '../i
 // Default constants for token budgeting
 export const DEFAULT_MAX_MODEL_TOKENS = 8192;
 export const DEFAULT_THRESHOLD_PERCENT = 0.7; // 70%
-export const DEFAULT_MIN_RECENT_MESSAGES = 2; // strategy-specific override allowed
+export const DEFAULT_MIN_RECENT_MESSAGES = 10; // strategy-specific override allowed
 export const DEFAULT_ESTIMATOR_TOKEN_BIAS = 2;
 
 /** Common token-budget fields shared by strategies. */
