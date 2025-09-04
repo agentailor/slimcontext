@@ -4,7 +4,6 @@ Lightweight, model-agnostic chat history compression utilities for AI assistants
 
 ![CI](https://github.com/agentailor/slimcontext/actions/workflows/ci.yml/badge.svg)
 
-
 ## Examples
 
 - OpenAI: see [examples/OPENAI_EXAMPLE.md](https://github.com/agentailor/slimcontext/blob/main/examples/OPENAI_EXAMPLE.md) (copy-paste snippet; BYOM, no deps added here).
@@ -125,7 +124,6 @@ Notes about summarization behavior
 ### Strategy Combination Example
 
 You can chain strategies depending on token thresholds or other heuristics.
-
 
 ## Example Integration
 
