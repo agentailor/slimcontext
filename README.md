@@ -6,8 +6,8 @@ Lightweight, model-agnostic chat history compression utilities for AI assistants
 
 ## Examples
 
-- OpenAI: see `examples/OPENAI_EXAMPLE.md` (copy-paste snippet; BYOM, no deps added here).
-- LangChain: see `examples/LANGCHAIN_EXAMPLE.md` and `examples/LANGCHAIN_COMPRESS_HISTORY.md`.
+- OpenAI: see [examples/OPENAI_EXAMPLE.md](https://github.com/agentailor/slimcontext/blob/main/examples/OPENAI_EXAMPLE.md) (copy-paste snippet; BYOM, no deps added here).
+- LangChain: see [examples/LANGCHAIN_EXAMPLE.md](https://github.com/agentailor/slimcontext/blob/main/examples/LANGCHAIN_EXAMPLE.md) and [examples/LANGCHAIN_COMPRESS_HISTORY.md](https://github.com/agentailor/slimcontext/blob/main/examples/LANGCHAIN_COMPRESS_HISTORY.md).
 
 ## Features
 
@@ -127,9 +127,9 @@ You can chain strategies depending on token thresholds or other heuristics.
 
 ## Example Integration
 
-- See `examples/OPENAI_EXAMPLE.md` for an OpenAI copy-paste snippet.
-- See `examples/LANGCHAIN_EXAMPLE.md` for a LangChain-style integration.
-- See `examples/LANGCHAIN_COMPRESS_HISTORY.md` for a one-call LangChain history compression helper.
+- See [examples/OPENAI_EXAMPLE.md](https://github.com/agentailor/slimcontext/blob/main/examples/OPENAI_EXAMPLE.md) for an OpenAI copy-paste snippet.
+- See [examples/LANGCHAIN_EXAMPLE.md](https://github.com/agentailor/slimcontext/blob/main/examples/LANGCHAIN_EXAMPLE.md) for a LangChain-style integration.
+- See [examples/LANGCHAIN_COMPRESS_HISTORY.md](https://github.com/agentailor/slimcontext/blob/main/examples/LANGCHAIN_COMPRESS_HISTORY.md) for a one-call LangChain history compression helper.
 
 ## Adapters
 
@@ -170,7 +170,7 @@ const compact = await langchain.compressLangChainHistory(history, {
 });
 ```
 
-See `examples/LANGCHAIN_COMPRESS_HISTORY.md` for a fuller copy-paste example.
+See [examples/LANGCHAIN_COMPRESS_HISTORY.md](https://github.com/agentailor/slimcontext/blob/main/examples/LANGCHAIN_COMPRESS_HISTORY.md) for a fuller copy-paste example.
 
 ## API
 

@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
+## [2.1.1] - 2025-09-04
+
+### Fixed
+
+- README: converted example links to absolute GitHub URLs so they render correctly on npmjs.com.
+
 ## [2.1.0] - 2025-08-28
 
 ### Breaking
