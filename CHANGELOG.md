@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
+## [2.1.2] - 2025-09-06
+
+### Added
+
+- Visual documentation with strategy diagrams showing trimming and summarization workflows
+- "Supported Strategies" section in README with visual explanations of trimming and summarization
+- Project guidance documentation for Claude Code in CLAUDE.md
+
+### Changed
+
+- Enhanced examples with more comprehensive usage patterns and clearer explanations
+- Consolidated LangChain examples: removed separate LANGCHAIN_EXAMPLE.md in favor of the more focused LANGCHAIN_COMPRESS_HISTORY.md
+- Updated OPENAI_EXAMPLE.md with improved code samples and workflow explanations
+
 ## [2.1.1] - 2025-09-04
 
 ### Fixed
