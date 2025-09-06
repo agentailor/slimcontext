@@ -4,10 +4,24 @@ Lightweight, model-agnostic chat history compression utilities for AI assistants
 
 ![CI](https://github.com/agentailor/slimcontext/actions/workflows/ci.yml/badge.svg)
 
+## Supported Strategies
+
+### Trimming
+
+Simple token-based compression that removes the oldest messages when your conversation exceeds the token threshold. Always preserves system messages and the most recent messages to maintain context continuity.
+
+![Trimming Strategy](docs/images/trimming-strategy.png)
+
+### Summarization
+
+AI-powered compression that uses your own chat model to create concise summaries of older conversation segments. The summary is injected as a system message, preserving the conversation flow while drastically reducing token usage.
+
+![Summarization Strategy](docs/images/summarization-strategy.png)
+
 ## Examples
 
 - OpenAI: see [examples/OPENAI_EXAMPLE.md](https://github.com/agentailor/slimcontext/blob/main/examples/OPENAI_EXAMPLE.md) (copy-paste snippet; BYOM, no deps added here).
-- LangChain: see [examples/LANGCHAIN_EXAMPLE.md](https://github.com/agentailor/slimcontext/blob/main/examples/LANGCHAIN_EXAMPLE.md) and [examples/LANGCHAIN_COMPRESS_HISTORY.md](https://github.com/agentailor/slimcontext/blob/main/examples/LANGCHAIN_COMPRESS_HISTORY.md).
+- LangChain: see [examples/LANGCHAIN_COMPRESS_HISTORY.md](https://github.com/agentailor/slimcontext/blob/main/examples/LANGCHAIN_COMPRESS_HISTORY.md).
 
 ## Features
 
@@ -128,7 +142,6 @@ You can chain strategies depending on token thresholds or other heuristics.
 ## Example Integration
 
 - See [examples/OPENAI_EXAMPLE.md](https://github.com/agentailor/slimcontext/blob/main/examples/OPENAI_EXAMPLE.md) for an OpenAI copy-paste snippet.
-- See [examples/LANGCHAIN_EXAMPLE.md](https://github.com/agentailor/slimcontext/blob/main/examples/LANGCHAIN_EXAMPLE.md) for a LangChain-style integration.
 - See [examples/LANGCHAIN_COMPRESS_HISTORY.md](https://github.com/agentailor/slimcontext/blob/main/examples/LANGCHAIN_COMPRESS_HISTORY.md) for a one-call LangChain history compression helper.
 
 ## Adapters
