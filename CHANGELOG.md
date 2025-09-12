@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
+## [2.1.3] - 2025-09-12
+
+### Added
+
+- Enhanced LangChain adapter with comprehensive ToolMessage support
+- Metadata preservation system for maintaining message properties during compression
+- Content preservation for complex message types (tool calls, function calls, etc.)
+- Extended SlimContextMessage interface with optional metadata field
+- Comprehensive test coverage for tool message handling and metadata preservation
+
+### Changed
+
+- Improved LangChain message conversion with robust metadata handling
+- Enhanced content extraction with fallback preservation for complex content types
+- Better roundtrip fidelity for LangChain BaseMessage conversions
+
+### Fixed
+
+- Tool message conversion now properly preserves tool_call_id and other tool-specific fields
+- Complex message content (arrays, objects) is now correctly preserved during compression
+- Message metadata fields are properly maintained throughout compression workflows
+
 ## [2.1.2] - 2025-09-06
 
 ### Added

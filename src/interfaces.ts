@@ -5,6 +5,8 @@
 export interface SlimContextMessage {
   role: 'system' | 'user' | 'assistant' | 'tool' | 'human';
   content: string;
+  /** Optional metadata to preserve additional message fields during conversion */
+  metadata?: Record<string, unknown>;
 }
 
 export interface SlimContextModelResponse {
