@@ -1,5 +1,5 @@
 import { SlimContextCompressor, SlimContextMessage, type TokenBudgetConfig } from '../interfaces';
-import { normalizeBudgetConfig, computeThresholdTokens } from './common';
+import { normalizeBudgetConfig, computeThresholdTokens, shouldAllowCompression } from './common';
 
 /**
  * Trim configuration options for the TrimCompressor using token thresholding.
@@ -19,6 +19,11 @@ export class TrimCompressor implements SlimContextCompressor {
   }
 
   async compress(messages: SlimContextMessage[]): Promise<SlimContextMessage[]> {
+    // Only compress when the last message is from a user to avoid disrupting tool use cycles
+    if (!shouldAllowCompression(messages)) {
+      return messages;
+    }
+
     const thresholdTokens = computeThresholdTokens(
       this.cfg.maxModelTokens,
       this.cfg.thresholdPercent,
