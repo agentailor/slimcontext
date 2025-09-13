@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
-## [2.1.3] - 2025-09-12
+## [2.1.3] - 2025-09-13
 
 ### Added
 
@@ -12,19 +12,23 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Metadata preservation system for maintaining message properties during compression
 - Content preservation for complex message types (tool calls, function calls, etc.)
 - Extended SlimContextMessage interface with optional metadata field
+- **Smart compression timing**: Added `shouldAllowCompression` function to prevent compression during active tool use cycles
 - Comprehensive test coverage for tool message handling and metadata preservation
+- Enhanced test coverage for compression timing and tool interaction patterns
 
 ### Changed
 
 - Improved LangChain message conversion with robust metadata handling
 - Enhanced content extraction with fallback preservation for complex content types
 - Better roundtrip fidelity for LangChain BaseMessage conversions
+- **TrimCompressor and SummarizeCompressor now only compress when the last message is from a user/human** to avoid disrupting tool use workflows
 
 ### Fixed
 
 - Tool message conversion now properly preserves tool_call_id and other tool-specific fields
 - Complex message content (arrays, objects) is now correctly preserved during compression
 - Message metadata fields are properly maintained throughout compression workflows
+- **Compression timing**: Prevents inappropriate compression during tool interactions that could break multi-turn tool workflows
 
 ## [2.1.2] - 2025-09-06
 

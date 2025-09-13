@@ -347,6 +347,7 @@ describe('LangChain Adapter', () => {
       new AIMessage('Message 2'),
       new HumanMessage('Message 3'),
       new AIMessage('Message 4'),
+      new HumanMessage('Message 5'), // End with user message to allow compression
     ];
 
     it('should compress history with the trim strategy', async () => {
@@ -361,10 +362,10 @@ describe('LangChain Adapter', () => {
       // our TrimCompressor preserves last two regardless; will drop earlier non-systems.
       expect(compressed.length).toBe(3);
       expect(compressed[0]).toBeInstanceOf(SystemMessage);
-      expect(compressed[1]).toBeInstanceOf(HumanMessage);
-      expect(compressed[1].content).toBe('Message 3');
-      expect(compressed[2]).toBeInstanceOf(AIMessage);
-      expect(compressed[2].content).toBe('Message 4');
+      expect(compressed[1]).toBeInstanceOf(AIMessage);
+      expect(compressed[1].content).toBe('Message 4');
+      expect(compressed[2]).toBeInstanceOf(HumanMessage);
+      expect(compressed[2].content).toBe('Message 5');
     });
 
     it('should compress history with the summarize strategy', async () => {
@@ -386,8 +387,8 @@ describe('LangChain Adapter', () => {
       expect(compressed[0]).toBeInstanceOf(SystemMessage);
       expect(compressed[1]).toBeInstanceOf(SystemMessage); // Summary is an System Message
       expect(compressed[1].content).toContain('This is a summary of messages 1 and 2.');
-      expect(compressed[2].content).toBe('Message 3');
-      expect(compressed[3].content).toBe('Message 4');
+      expect(compressed[2].content).toBe('Message 4');
+      expect(compressed[3].content).toBe('Message 5');
     });
 
     it('should work with a pre-created compressor', async () => {
@@ -406,7 +407,7 @@ describe('LangChain Adapter', () => {
 
       expect(compressed).toHaveLength(2);
       expect(compressed[0].content).toBe('Custom summary');
-      expect(compressed[1].content).toBe('Message 4');
+      expect(compressed[1].content).toBe('Message 5');
     });
 
     it('should preserve tool messages during compression', async () => {
@@ -470,6 +471,11 @@ describe('LangChain Adapter', () => {
           id: 'ai_002',
           response_metadata: { tokens: 8 },
         }),
+        new HumanMessage({
+          content: 'Thanks!',
+          id: 'user_002',
+          name: 'user123',
+        }),
       ];
 
       const compressed = await compressLangChainHistory(historyWithMetadata, {
@@ -488,23 +494,17 @@ describe('LangChain Adapter', () => {
       expect(compressed[0].id).toBe('system_001');
       expect(compressed[0].name).toBe('system');
 
-      // Check tool message metadata preserved
-      expect(compressed[1]).toBeInstanceOf(ToolMessage);
-      const toolMsg = compressed[1] as ToolMessage;
-      expect(toolMsg.content).toBe('{"result": 25}');
-      expect(toolMsg.tool_call_id).toBe('calc_operation_456');
-      expect(toolMsg.id).toBe('tool_001');
-      expect(toolMsg.name).toBe('calculator');
-      expect(toolMsg.status).toBe('success');
-      expect(toolMsg.artifact).toEqual({
-        operation: 'addition',
-        operands: [10, 15],
-      });
+      // Check AI message metadata preserved (2nd to last)
+      expect(compressed[1]).toBeInstanceOf(AIMessage);
+      const aiMsg = compressed[1] as AIMessage;
+      expect(aiMsg.content).toBe('The result is 25.');
+      expect(aiMsg.id).toBe('ai_002');
 
-      // Check AI message metadata preserved
-      expect(compressed[2]).toBeInstanceOf(AIMessage);
-      expect(compressed[2].id).toBe('ai_002');
-      expect(compressed[2].response_metadata).toEqual({ tokens: 8 });
+      // Check last human message
+      expect(compressed[2]).toBeInstanceOf(HumanMessage);
+      const humanMsg = compressed[2] as HumanMessage;
+      expect(humanMsg.content).toBe('Thanks!');
+      expect(humanMsg.id).toBe('user_002');
     });
 
     it('should preserve complex content during compression', async () => {

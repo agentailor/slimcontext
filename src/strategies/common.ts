@@ -46,3 +46,13 @@ export function estimateTotalTokens(
   for (const m of messages) total += estimateTokens(m);
   return total;
 }
+
+/**
+ * Check if compression should be allowed based on the last message type.
+ * Only compress when the last message is from a user to avoid disrupting tool use cycles.
+ */
+export function shouldAllowCompression(messages: SlimContextMessage[]): boolean {
+  if (messages.length === 0) return false;
+  const lastMessage = messages[messages.length - 1];
+  return lastMessage.role === 'user' || lastMessage.role === 'human';
+}
